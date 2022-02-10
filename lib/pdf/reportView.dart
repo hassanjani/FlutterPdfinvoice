@@ -46,11 +46,11 @@ class _CreatePdfState extends State<CreatePdf> {
 
   create() async {
     const String paragraphText =
-        'Kata sanga ye Mal de Tang ky\'s Portable Document Format (PDF) is the de facto'
+        'Hello Flutter is awesome\'s Portable Document Format (PDF) is the de facto'
         'standard for the accurate, reliable, and platform-independent representation of a paged'
         'document. It\'s the only universally accepted file format that allows pixel-perfect layouts.'
         'In addition, PDF supports user interaction and collaborative workflows that are not'
-        'possible with printed documents.';
+        'possible with printed documents.  hassan.uswat@gmail.com';
 
 // Create a new PDF document.
     final PdfDocument document = PdfDocument();
