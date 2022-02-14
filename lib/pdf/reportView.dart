@@ -1,5 +1,8 @@
+import 'dart:typed_data';
+
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'package:webtest/pdf/save_file_web.dart';
@@ -108,10 +111,14 @@ class _CreatePdfState extends State<CreatePdf> {
         pen: PdfPen(PdfColor(142, 170, 219, 255)));
     //Generate PDF grid.
     final PdfGrid grid = _getGrid();
+    final PdfGrid grid1 = _getGrid1();
     //Draw the header section by creating text element
-    final PdfLayoutResult result = _drawHeader(page, pageSize, grid);
+    final PdfLayoutResult result = await _drawHeader(page, pageSize, grid);
+    grid1.draw(page: page, bounds: Rect.fromLTWH(0, 200 + 30, 0, 0))!;
+
     //Draw grid
     _drawGrid(page, grid, result);
+    // _drawGrid(page, grid, result);
     //Add invoice footer
     _drawFooter(page, pageSize);
     //Save and dispose the document.
@@ -122,42 +129,71 @@ class _CreatePdfState extends State<CreatePdf> {
   }
 
   //Draws the invoice header
-  PdfLayoutResult _drawHeader(PdfPage page, Size pageSize, PdfGrid grid) {
+  Future<PdfLayoutResult> _drawHeader(
+      PdfPage page, Size pageSize, PdfGrid grid) async {
     //Draw rectangle
-    page.graphics.drawRectangle(
-        brush: PdfSolidBrush(PdfColor(91, 126, 215, 255)),
-        bounds: Rect.fromLTWH(0, 0, pageSize.width - 115, 90));
+    // page.graphics.drawRectangle(
+    //     brush: PdfSolidBrush(PdfColor(91, 126, 215, 255)),
+    //     bounds: Rect.fromLTWH(0, 0, pageSize.width - 115, 90));
+    //logo
+//Load the image using PdfBitmap.
+    AssetImage assetImage = AssetImage('assets/logo.png');
+    final ByteData bytes = await rootBundle.load('assets/logo.png');
+    final Uint8List list = bytes.buffer.asUint8List();
+
+    final PdfBitmap image = PdfBitmap(list);
+
+    page.graphics.drawImage(image, Rect.fromLTWH(25, 0, 90, 90));
+
     //Draw string
-    page.graphics.drawString(
-        'Intouch Invoice', PdfStandardFont(PdfFontFamily.helvetica, 30),
-        brush: PdfBrushes.white,
-        bounds: Rect.fromLTWH(25, 0, pageSize.width - 115, 90),
-        format: PdfStringFormat(lineAlignment: PdfVerticalAlignment.middle));
+    // page.graphics.drawString(
+    //     'Intouch Invoice', PdfStandardFont(PdfFontFamily.helvetica, 30),
+    //     brush: PdfBrushes.white,
+    //     bounds: Rect.fromLTWH(25, 0, pageSize.width - 115, 90),
+    //     format: PdfStringFormat(lineAlignment: PdfVerticalAlignment.middle));
     page.graphics.drawRectangle(
-        bounds: Rect.fromLTWH(400, 0, pageSize.width - 400, 90),
-        brush: PdfSolidBrush(PdfColor(65, 104, 205)));
-    page.graphics.drawString(r'$' + _getTotalAmount(grid).toString(),
-        PdfStandardFont(PdfFontFamily.helvetica, 18),
-        bounds: Rect.fromLTWH(400, 0, pageSize.width - 400, 100),
-        brush: PdfBrushes.white,
+      bounds: Rect.fromLTWH(0, 0, pageSize.width, 100),
+      pen: PdfPen(PdfColor(255, 0, 0)),
+      // brush: PdfSolidBrush(PdfColor(65, 104, 205))
+    );
+    page.graphics.drawString(
+        "Payment Reciept", PdfStandardFont(PdfFontFamily.helvetica, 20),
+        bounds: Rect.fromLTWH(300, 0, 200, 100),
+        brush: PdfBrushes.blue,
         format: PdfStringFormat(
             alignment: PdfTextAlignment.center,
             lineAlignment: PdfVerticalAlignment.middle));
+
+    page.graphics.drawString(
+        "Smart & simple", PdfStandardFont(PdfFontFamily.helvetica, 15),
+        bounds: Rect.fromLTWH(120, 53, 200, 20),
+        brush: PdfBrushes.black,
+        format: PdfStringFormat(
+            alignment: PdfTextAlignment.left,
+            lineAlignment: PdfVerticalAlignment.middle));
+    page.graphics.drawString(
+        "TENECALL LTD", PdfStandardFont(PdfFontFamily.helvetica, 18),
+        bounds: Rect.fromLTWH(120, 20, 200, 30),
+        brush: PdfBrushes.black,
+        format: PdfStringFormat(
+            alignment: PdfTextAlignment.left,
+            lineAlignment: PdfVerticalAlignment.middle));
     final PdfFont contentFont = PdfStandardFont(PdfFontFamily.helvetica, 9);
     //Draw string
-    page.graphics.drawString('Amount', contentFont,
-        brush: PdfBrushes.white,
-        bounds: Rect.fromLTWH(400, 0, pageSize.width - 400, 33),
-        format: PdfStringFormat(
-            alignment: PdfTextAlignment.center,
-            lineAlignment: PdfVerticalAlignment.bottom));
+    // page.graphics.drawString('Amount', contentFont,
+    //     brush: PdfBrushes.white,
+    //     bounds: Rect.fromLTWH(400, 0, pageSize.width - 400, 33),
+    //     format: PdfStringFormat(
+    //         alignment: PdfTextAlignment.center,
+    //         lineAlignment: PdfVerticalAlignment.bottom));
     //Create data foramt and convert it to text.
     final DateFormat format = DateFormat.yMMMMd('en_US');
     final String invoiceNumber = 'Invoice Number: 2058557939\r\n\r\nDate: ' +
-        format.format(DateTime.now());
+        format.format(DateTime.now()) +
+        '\r\n\r\nSerial: SALES21005/TECH2';
     final Size contentSize = contentFont.measureString(invoiceNumber);
     const String address =
-        'Bill To: \r\n\r\nFazal Basit, \r\n\r\nUnited States, California, San Mateo, \r\n\r\n9920 BridgePointe Parkway, \r\n\r\n9365550136';
+        'Paid To: \r\n\r\nFazal Basit, \r\n\r\nUnited States, California, San Mateo, \r\n\r\n9920 BridgePointe Parkway, \r\n\r\n9365550136';
     PdfTextElement(text: invoiceNumber, font: contentFont).draw(
         page: page,
         bounds: Rect.fromLTWH(pageSize.width - (contentSize.width + 30), 120,
@@ -183,7 +219,7 @@ class _CreatePdfState extends State<CreatePdf> {
     };
     //Draw the PDF grid and get the result.
     result = grid.draw(
-        page: page, bounds: Rect.fromLTWH(0, result.bounds.bottom + 40, 0, 0))!;
+        page: page, bounds: Rect.fromLTWH(0, result.bounds.bottom + 80, 0, 0))!;
     //Draw grand total.
     page.graphics.drawString('Grand Total',
         PdfStandardFont(PdfFontFamily.helvetica, 9, style: PdfFontStyle.bold),
@@ -218,32 +254,76 @@ class _CreatePdfState extends State<CreatePdf> {
         bounds: Rect.fromLTWH(pageSize.width - 30, pageSize.height - 70, 0, 0));
   }
 
-  //Create PDF grid and return
-  PdfGrid _getGrid() {
+  PdfGrid _getGrid1() {
     //Create a PDF grid
     final PdfGrid grid = PdfGrid();
     //Secify the columns count to the grid.
-    grid.columns.add(count: 5);
+    grid.columns.add(count: 3);
     //Create the header row of the grid.
     final PdfGridRow headerRow = grid.headers.add(1)[0];
     //Set style
     headerRow.style.backgroundBrush = PdfSolidBrush(PdfColor(68, 114, 196));
     headerRow.style.textBrush = PdfBrushes.white;
-    headerRow.cells[0].value = 'Product Id';
+    headerRow.cells[0].value = 'Payment Method';
     headerRow.cells[0].stringFormat.alignment = PdfTextAlignment.center;
-    headerRow.cells[1].value = 'Product Name';
-    headerRow.cells[2].value = 'Price';
-    headerRow.cells[3].value = 'Quantity';
-    headerRow.cells[4].value = 'Total';
-    _addProducts('CA-1098', 'AWC Logo Cap', 8.99, 2, 17.98, grid);
-    _addProducts(
-        'LJ-0192', 'Long-Sleeve Logo Jersey,M', 49.99, 3, 149.97, grid);
-    _addProducts('So-B909-M', 'Mountain Bike Socks,M', 9.5, 2, 19, grid);
-    _addProducts(
-        'LJ-0192', 'Long-Sleeve Logo Jersey,M', 49.99, 4, 199.96, grid);
-    _addProducts('FK-5136', 'ML Fork', 175.49, 6, 1052.94, grid);
-    _addProducts('HL-U509', 'Sports-100 Helmet,Black', 34.99, 1, 34.99, grid);
-    grid.applyBuiltInStyle(PdfGridBuiltInStyle.listTable4Accent5);
+    headerRow.cells[1].value = 'Check no';
+    headerRow.cells[1].stringFormat.alignment = PdfTextAlignment.center;
+    headerRow.cells[2].value = 'Role';
+    headerRow.cells[2].stringFormat.alignment = PdfTextAlignment.center;
+
+    final PdfGridRow row = grid.rows.add();
+    row.cells[0].value = "Cash";
+    row.cells[0].stringFormat.alignment = PdfTextAlignment.center;
+    row.cells[1].value = "----";
+    row.cells[1].stringFormat.alignment = PdfTextAlignment.center;
+    row.cells[2].value = "Sales + Tech Rep";
+    row.cells[2].stringFormat.alignment = PdfTextAlignment.center;
+
+    grid.applyBuiltInStyle(PdfGridBuiltInStyle.gridTable1LightAccent1);
+    grid.columns[1].width = 200;
+    for (int i = 0; i < headerRow.cells.count; i++) {
+      headerRow.cells[i].style.cellPadding =
+          PdfPaddings(bottom: 5, left: 5, right: 5, top: 5);
+    }
+    for (int i = 0; i < grid.rows.count; i++) {
+      final PdfGridRow row = grid.rows[i];
+      for (int j = 0; j < row.cells.count; j++) {
+        final PdfGridCell cell = row.cells[j];
+        if (j == 0) {
+          cell.stringFormat.alignment = PdfTextAlignment.center;
+        }
+        cell.style.cellPadding =
+            PdfPaddings(bottom: 5, left: 5, right: 5, top: 5);
+      }
+    }
+    return grid;
+  }
+
+  //Create PDF grid and return
+  PdfGrid _getGrid() {
+    //Create a PDF grid
+    final PdfGrid grid = PdfGrid();
+    //Secify the columns count to the grid.
+    grid.columns.add(count: 6);
+    //Create the header row of the grid.
+    final PdfGridRow headerRow = grid.headers.add(1)[0];
+    //Set style
+    headerRow.style.backgroundBrush = PdfSolidBrush(PdfColor(68, 114, 196));
+    headerRow.style.textBrush = PdfBrushes.white;
+    headerRow.cells[0].value = 'Item#';
+    headerRow.cells[0].stringFormat.alignment = PdfTextAlignment.center;
+    headerRow.cells[1].value = 'Discription';
+    headerRow.cells[2].value = 'Unit Price';
+    headerRow.cells[3].value = 'Qty';
+    headerRow.cells[4].value = 'Rewards';
+    headerRow.cells[5].value = 'Line Total';
+    _addProducts('1', 'AWC Logo Cap', 8.99, 2, 0, 17.98, grid);
+    _addProducts('4', 'Long-Sleeve Logo Jersey,M', 49.99, 3, 0, 149.97, grid);
+    _addProducts('3', 'Mountain Bike Socks,M', 9.5, 2, 0, 19, grid);
+    _addProducts('8', 'Long-Sleeve Logo Jersey,M', 49.99, 4, 0, 199.96, grid);
+    _addProducts('5', 'ML Fork', 175.49, 6, 0, 1052.94, grid);
+    _addProducts('6', 'Sports-100 Helmet,Black', 34.99, 1, 0, 34.99, grid);
+    grid.applyBuiltInStyle(PdfGridBuiltInStyle.gridTable1LightAccent1);
     grid.columns[1].width = 200;
     for (int i = 0; i < headerRow.cells.count; i++) {
       headerRow.cells[i].style.cellPadding =
@@ -265,13 +345,14 @@ class _CreatePdfState extends State<CreatePdf> {
 
   //Create and row for the grid.
   void _addProducts(String productId, String productName, double price,
-      int quantity, double total, PdfGrid grid) {
+      int quantity, double rewards, double total, PdfGrid grid) {
     final PdfGridRow row = grid.rows.add();
     row.cells[0].value = productId;
     row.cells[1].value = productName;
     row.cells[2].value = price.toString();
     row.cells[3].value = quantity.toString();
-    row.cells[4].value = total.toString();
+    row.cells[4].value = rewards.toString();
+    row.cells[5].value = total.toString();
   }
 
   //Get the total amount.
