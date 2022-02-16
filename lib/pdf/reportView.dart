@@ -8,13 +8,19 @@ import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'package:webtest/pdf/save_file_web.dart';
 
 class CreatePdf extends StatefulWidget {
-  const CreatePdf({Key? key}) : super(key: key);
+  User PersonalDetail;
+  List<Items> ItemsList;
+  CreatePdf(this.PersonalDetail, this.ItemsList);
 
   @override
-  _CreatePdfState createState() => _CreatePdfState();
+  _CreatePdfState createState() => _CreatePdfState(PersonalDetail, ItemsList);
 }
 
 class _CreatePdfState extends State<CreatePdf> {
+  User PersonalDetail;
+  List<Items> ItemsList;
+  _CreatePdfState(this.PersonalDetail, this.ItemsList);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -143,7 +149,7 @@ class _CreatePdfState extends State<CreatePdf> {
 
     final PdfBitmap image = PdfBitmap(list);
 
-    page.graphics.drawImage(image, Rect.fromLTWH(25, 0, 90, 90));
+    page.graphics.drawImage(image, Rect.fromLTWH(25, 5, 90, 90));
 
     //Draw string
     // page.graphics.drawString(
@@ -179,21 +185,15 @@ class _CreatePdfState extends State<CreatePdf> {
             alignment: PdfTextAlignment.left,
             lineAlignment: PdfVerticalAlignment.middle));
     final PdfFont contentFont = PdfStandardFont(PdfFontFamily.helvetica, 9);
-    //Draw string
-    // page.graphics.drawString('Amount', contentFont,
-    //     brush: PdfBrushes.white,
-    //     bounds: Rect.fromLTWH(400, 0, pageSize.width - 400, 33),
-    //     format: PdfStringFormat(
-    //         alignment: PdfTextAlignment.center,
-    //         lineAlignment: PdfVerticalAlignment.bottom));
-    //Create data foramt and convert it to text.
     final DateFormat format = DateFormat.yMMMMd('en_US');
-    final String invoiceNumber = 'Invoice Number: 2058557939\r\n\r\nDate: ' +
-        format.format(DateTime.now()) +
-        '\r\n\r\nSerial: SALES21005/TECH2';
+    final String invoiceNumber =
+        'Invoice Number: ${PersonalDetail.invoiceno}\r\n\r\nDate: ' +
+            format.format(DateTime.now()) +
+            '\r\n\r\nSerial: ${PersonalDetail.serial}';
     final Size contentSize = contentFont.measureString(invoiceNumber);
-    const String address =
-        'Paid To: \r\n\r\nFazal Basit, \r\n\r\nUnited States, California, San Mateo, \r\n\r\n9920 BridgePointe Parkway, \r\n\r\n9365550136';
+
+    String address =
+        'Paid To: \r\n\r\n ${PersonalDetail.userName}, \r\n\r\n${PersonalDetail.address}, \r\n\r\n${PersonalDetail.phoneNumber}';
     PdfTextElement(text: invoiceNumber, font: contentFont).draw(
         page: page,
         bounds: Rect.fromLTWH(pageSize.width - (contentSize.width + 30), 120,
@@ -272,11 +272,11 @@ class _CreatePdfState extends State<CreatePdf> {
     headerRow.cells[2].stringFormat.alignment = PdfTextAlignment.center;
 
     final PdfGridRow row = grid.rows.add();
-    row.cells[0].value = "Cash";
+    row.cells[0].value = "${PersonalDetail.paymentMethod}";
     row.cells[0].stringFormat.alignment = PdfTextAlignment.center;
-    row.cells[1].value = "----";
+    row.cells[1].value = "${PersonalDetail.checkno}";
     row.cells[1].stringFormat.alignment = PdfTextAlignment.center;
-    row.cells[2].value = "Sales + Tech Rep";
+    row.cells[2].value = "${PersonalDetail.role}";
     row.cells[2].stringFormat.alignment = PdfTextAlignment.center;
 
     grid.applyBuiltInStyle(PdfGridBuiltInStyle.gridTable1LightAccent1);
@@ -317,12 +317,25 @@ class _CreatePdfState extends State<CreatePdf> {
     headerRow.cells[3].value = 'Qty';
     headerRow.cells[4].value = 'Rewards';
     headerRow.cells[5].value = 'Line Total';
-    _addProducts('1', 'AWC Logo Cap', 8.99, 2, 0, 17.98, grid);
-    _addProducts('4', 'Long-Sleeve Logo Jersey,M', 49.99, 3, 0, 149.97, grid);
-    _addProducts('3', 'Mountain Bike Socks,M', 9.5, 2, 0, 19, grid);
-    _addProducts('8', 'Long-Sleeve Logo Jersey,M', 49.99, 4, 0, 199.96, grid);
-    _addProducts('5', 'ML Fork', 175.49, 6, 0, 1052.94, grid);
-    _addProducts('6', 'Sports-100 Helmet,Black', 34.99, 1, 0, 34.99, grid);
+    for (int i = 0; i < ItemsList.length; i++) {
+      double total =
+          ItemsList[i].unitprice * ItemsList[i].quantity + ItemsList[i].rewards;
+      _addProducts(
+          ItemsList[i].itemNo.toString(),
+          ItemsList[i].discription.toString(),
+          ItemsList[i].unitprice,
+          ItemsList[i].quantity,
+          ItemsList[i].rewards,
+          total,
+          grid);
+    }
+
+    // _addProducts('1', 'AWC Logo Cap', 8.99, 2, 0, 17.98, grid);
+    // _addProducts('4', 'Long-Sleeve Logo Jersey,M', 49.99, 3, 0, 149.97, grid);
+    // _addProducts('3', 'Mountain Bike Socks,M', 9.5, 2, 0, 19, grid);
+    // _addProducts('8', 'Long-Sleeve Logo Jersey,M', 49.99, 4, 0, 199.96, grid);
+    // _addProducts('5', 'ML Fork', 175.49, 6, 0, 1052.94, grid);
+    // _addProducts('6', 'Sports-100 Helmet,Black', 34.99, 1, 0, 34.99, grid);
     grid.applyBuiltInStyle(PdfGridBuiltInStyle.gridTable1LightAccent1);
     grid.columns[1].width = 200;
     for (int i = 0; i < headerRow.cells.count; i++) {
@@ -365,4 +378,55 @@ class _CreatePdfState extends State<CreatePdf> {
     }
     return total;
   }
+
+//rewardTotal
+  double _getTotalRewards(PdfGrid grid) {
+    double total = 0;
+    for (int i = 0; i < grid.rows.count; i++) {
+      final String value =
+          grid.rows[i].cells[grid.columns.count - 1].value as String;
+      total += double.parse(value);
+    }
+    return total;
+  }
+}
+
+class User {
+  final String userName;
+  final String address;
+  final String phoneNumber;
+  final String paymentMethod;
+  final String checkno;
+  final String role;
+  final String invoiceno;
+  final String serial;
+
+  const User(
+    @required this.userName,
+    @required this.address,
+    @required this.phoneNumber,
+    @required this.paymentMethod,
+    @required this.checkno,
+    @required this.role,
+    @required this.invoiceno,
+    @required this.serial,
+  );
+}
+
+class Items {
+  final int itemNo;
+  final String discription;
+  final double unitprice;
+  final int quantity;
+  final double rewards;
+  final double total;
+
+  const Items(
+    @required this.itemNo,
+    @required this.discription,
+    @required this.unitprice,
+    @required this.quantity,
+    @required this.rewards,
+    @required this.total,
+  );
 }
