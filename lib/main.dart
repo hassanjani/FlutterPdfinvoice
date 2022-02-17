@@ -68,12 +68,24 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    User person = User("Fazal Basit", "Gunbad Maira Mingora \n Swat",
-        "0312131313", "cash", "----", "saletax", "9122121", "91289192312");
+    PersonalDetails person = PersonalDetails(
+        "Fazal Basit",
+        "Gunbad Maira Mingora \n Swat",
+        "0312131313",
+        "cash",
+        "----",
+        "saletax",
+        "9122121",
+        "91289192312",
+        100);
     List<Items> Itemlist = [];
     Itemlist.add(Items(2, "Hiking Bag", 100, 3, 50));
     Itemlist.add(Items(4, "School Bag", 500, 2, 10));
     Itemlist.add(Items(2, "Laptop Bag", 300, 6, 80));
+    Itemlist.add(Items(7, "Big Bag", 150, 4, 30));
+    Itemlist.add(Items(7, "Big Bag", 150, 4, 30));
+    Itemlist.add(Items(7, "Big Bag", 150, 4, 30));
+    Itemlist.add(Items(7, "Big Bag", 150, 4, 30));
     Itemlist.add(Items(7, "Big Bag", 150, 4, 30));
 
     Navigator.push(context,

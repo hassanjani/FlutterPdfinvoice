@@ -8,7 +8,7 @@ import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'package:webtest/pdf/save_file_web.dart';
 
 class CreatePdf extends StatefulWidget {
-  User PersonalDetail;
+  PersonalDetails PersonalDetail;
   List<Items> ItemsList;
   CreatePdf(this.PersonalDetail, this.ItemsList);
 
@@ -17,7 +17,7 @@ class CreatePdf extends StatefulWidget {
 }
 
 class _CreatePdfState extends State<CreatePdf> {
-  User PersonalDetail;
+  PersonalDetails PersonalDetail;
   List<Items> ItemsList;
   _CreatePdfState(this.PersonalDetail, this.ItemsList);
 
@@ -159,7 +159,7 @@ class _CreatePdfState extends State<CreatePdf> {
     //     format: PdfStringFormat(lineAlignment: PdfVerticalAlignment.middle));
     page.graphics.drawRectangle(
       bounds: Rect.fromLTWH(0, 0, pageSize.width, 100),
-      pen: PdfPen(PdfColor(255, 0, 0)),
+      pen: PdfPen(PdfColor(102, 217, 255)),
       // brush: PdfSolidBrush(PdfColor(65, 104, 205))
     );
     page.graphics.drawString(
@@ -222,52 +222,95 @@ class _CreatePdfState extends State<CreatePdf> {
         page: page, bounds: Rect.fromLTWH(0, result.bounds.bottom + 80, 0, 0))!;
     //Draw grand total.
 
+    page.graphics.drawRectangle(
+      bounds: Rect.fromLTWH(5, result.bounds.bottom + 25, 300, 100),
+      pen: PdfPen(PdfColor(102, 217, 255)),
+    );
+    page.graphics.drawString('CFO Aproval',
+        PdfStandardFont(PdfFontFamily.helvetica, 9, style: PdfFontStyle.bold),
+        bounds: Rect.fromLTWH(100, result.bounds.bottom + 10, 200, 15));
+    page.graphics.drawString(
+        'Viendo Restaurant\r\n\r\nMaster Baker',
+        PdfStandardFont(PdfFontFamily.helvetica, 8,
+            style: PdfFontStyle.regular),
+        bounds: Rect.fromLTWH(50, result.bounds.bottom + 130, 200, 30));
+
     page.graphics.drawString('Total Rewards',
         PdfStandardFont(PdfFontFamily.helvetica, 9, style: PdfFontStyle.bold),
         bounds: Rect.fromLTWH(
-            quantityCellBounds!.left,
+            quantityCellBounds!.left - 10,
             result.bounds.bottom + 10,
             quantityCellBounds!.width,
             quantityCellBounds!.height));
     page.graphics.drawString(_getTotalRewards(grid).toString(),
         PdfStandardFont(PdfFontFamily.helvetica, 9, style: PdfFontStyle.bold),
         bounds: Rect.fromLTWH(
-            totalPriceCellBounds!.left,
+            totalPriceCellBounds!.left + 10,
             result.bounds.bottom + 10,
             totalPriceCellBounds!.width,
             totalPriceCellBounds!.height));
 
-    page.graphics.drawString('Grand Total',
+    page.graphics.drawString('Subtotal',
         PdfStandardFont(PdfFontFamily.helvetica, 9, style: PdfFontStyle.bold),
         bounds: Rect.fromLTWH(
-            quantityCellBounds!.left,
-            result.bounds.bottom + 20,
+            quantityCellBounds!.left - 10,
+            result.bounds.bottom + 25,
             quantityCellBounds!.width,
             quantityCellBounds!.height));
     page.graphics.drawString(_getTotalAmount(grid).toString(),
         PdfStandardFont(PdfFontFamily.helvetica, 9, style: PdfFontStyle.bold),
         bounds: Rect.fromLTWH(
-            totalPriceCellBounds!.left,
-            result.bounds.bottom + 20,
+            totalPriceCellBounds!.left + 10,
+            result.bounds.bottom + 25,
+            totalPriceCellBounds!.width,
+            totalPriceCellBounds!.height));
+
+    page.graphics.drawString('Tax',
+        PdfStandardFont(PdfFontFamily.helvetica, 9, style: PdfFontStyle.bold),
+        bounds: Rect.fromLTWH(
+            quantityCellBounds!.left - 10,
+            result.bounds.bottom + 40,
+            quantityCellBounds!.width,
+            quantityCellBounds!.height));
+    page.graphics.drawString("${PersonalDetail.tax}".toString(),
+        PdfStandardFont(PdfFontFamily.helvetica, 9, style: PdfFontStyle.bold),
+        bounds: Rect.fromLTWH(
+            totalPriceCellBounds!.left + 10,
+            result.bounds.bottom + 40,
+            totalPriceCellBounds!.width,
+            totalPriceCellBounds!.height));
+    page.graphics.drawString('Total',
+        PdfStandardFont(PdfFontFamily.helvetica, 9, style: PdfFontStyle.bold),
+        bounds: Rect.fromLTWH(
+            quantityCellBounds!.left - 10,
+            result.bounds.bottom + 60,
+            quantityCellBounds!.width,
+            quantityCellBounds!.height));
+    double gTotal = PersonalDetail.tax + _getTotalAmount(grid);
+    page.graphics.drawString("${gTotal}".toString(),
+        PdfStandardFont(PdfFontFamily.helvetica, 9, style: PdfFontStyle.bold),
+        bounds: Rect.fromLTWH(
+            totalPriceCellBounds!.left + 10,
+            result.bounds.bottom + 60,
             totalPriceCellBounds!.width,
             totalPriceCellBounds!.height));
   }
 
   //Draw the invoice footer data.
   void _drawFooter(PdfPage page, Size pageSize) {
-    final PdfPen linePen =
-        PdfPen(PdfColor(142, 170, 219, 255), dashStyle: PdfDashStyle.custom);
-    linePen.dashPattern = <double>[3, 3];
-    //Draw line
-    page.graphics.drawLine(linePen, Offset(0, pageSize.height - 100),
-        Offset(pageSize.width, pageSize.height - 100));
+    // final PdfPen linePen =
+    //     PdfPen(PdfColor(142, 170, 219, 255), dashStyle: PdfDashStyle.custom);
+    // linePen.dashPattern = <double>[3, 3];
+    // //Draw line
+    // page.graphics.drawLine(linePen, Offset(0, pageSize.height - 100),
+    //     Offset(pageSize.width, pageSize.height - 100));
     const String footerContent =
-        '800 Interchange Blvd.\r\n\r\nSuite 2501, Austin, TX 78721\r\n\r\nAny Questions? support@adventure-works.com';
+        'Thank You for your Payment\r\n\r\nHello@tenecall.com';
     //Added 30 as a margin for the layout
     page.graphics.drawString(
         footerContent, PdfStandardFont(PdfFontFamily.helvetica, 9),
         format: PdfStringFormat(alignment: PdfTextAlignment.right),
-        bounds: Rect.fromLTWH(pageSize.width - 30, pageSize.height - 70, 0, 0));
+        bounds: Rect.fromLTWH(pageSize.width / 2, pageSize.height - 70, 0, 0));
   }
 
   PdfGrid _getGrid1() {
@@ -407,7 +450,7 @@ class _CreatePdfState extends State<CreatePdf> {
   }
 }
 
-class User {
+class PersonalDetails {
   final String userName;
   final String address;
   final String phoneNumber;
@@ -416,8 +459,9 @@ class User {
   final String role;
   final String invoiceno;
   final String serial;
+  final double tax;
 
-  const User(
+  const PersonalDetails(
     @required this.userName,
     @required this.address,
     @required this.phoneNumber,
@@ -426,6 +470,7 @@ class User {
     @required this.role,
     @required this.invoiceno,
     @required this.serial,
+    @required this.tax,
   );
 }
 
