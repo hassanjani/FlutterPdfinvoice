@@ -221,18 +221,34 @@ class _CreatePdfState extends State<CreatePdf> {
     result = grid.draw(
         page: page, bounds: Rect.fromLTWH(0, result.bounds.bottom + 80, 0, 0))!;
     //Draw grand total.
-    page.graphics.drawString('Grand Total',
+
+    page.graphics.drawString('Total Rewards',
         PdfStandardFont(PdfFontFamily.helvetica, 9, style: PdfFontStyle.bold),
         bounds: Rect.fromLTWH(
             quantityCellBounds!.left,
             result.bounds.bottom + 10,
             quantityCellBounds!.width,
             quantityCellBounds!.height));
-    page.graphics.drawString(_getTotalAmount(grid).toString(),
+    page.graphics.drawString(_getTotalRewards(grid).toString(),
         PdfStandardFont(PdfFontFamily.helvetica, 9, style: PdfFontStyle.bold),
         bounds: Rect.fromLTWH(
             totalPriceCellBounds!.left,
             result.bounds.bottom + 10,
+            totalPriceCellBounds!.width,
+            totalPriceCellBounds!.height));
+
+    page.graphics.drawString('Grand Total',
+        PdfStandardFont(PdfFontFamily.helvetica, 9, style: PdfFontStyle.bold),
+        bounds: Rect.fromLTWH(
+            quantityCellBounds!.left,
+            result.bounds.bottom + 20,
+            quantityCellBounds!.width,
+            quantityCellBounds!.height));
+    page.graphics.drawString(_getTotalAmount(grid).toString(),
+        PdfStandardFont(PdfFontFamily.helvetica, 9, style: PdfFontStyle.bold),
+        bounds: Rect.fromLTWH(
+            totalPriceCellBounds!.left,
+            result.bounds.bottom + 20,
             totalPriceCellBounds!.width,
             totalPriceCellBounds!.height));
   }
@@ -384,7 +400,7 @@ class _CreatePdfState extends State<CreatePdf> {
     double total = 0;
     for (int i = 0; i < grid.rows.count; i++) {
       final String value =
-          grid.rows[i].cells[grid.columns.count - 1].value as String;
+          grid.rows[i].cells[grid.columns.count - 2].value as String;
       total += double.parse(value);
     }
     return total;
@@ -419,7 +435,6 @@ class Items {
   final double unitprice;
   final int quantity;
   final double rewards;
-  final double total;
 
   const Items(
     @required this.itemNo,
@@ -427,6 +442,5 @@ class Items {
     @required this.unitprice,
     @required this.quantity,
     @required this.rewards,
-    @required this.total,
   );
 }

@@ -25,7 +25,9 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: CreatePdf(),
+      home: MyHomePage(
+        title: "",
+      ),
     );
   }
 }
@@ -60,6 +62,22 @@ class _MyHomePageState extends State<MyHomePage> {
       // called again, and so nothing would appear to happen.
       _counter++;
     });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    User person = User("Fazal Basit", "Gunbad Maira Mingora \n Swat",
+        "0312131313", "cash", "----", "saletax", "9122121", "91289192312");
+    List<Items> Itemlist = [];
+    Itemlist.add(Items(2, "Hiking Bag", 100, 3, 50));
+    Itemlist.add(Items(4, "School Bag", 500, 2, 10));
+    Itemlist.add(Items(2, "Laptop Bag", 300, 6, 80));
+    Itemlist.add(Items(7, "Big Bag", 150, 4, 30));
+
+    Navigator.push(context,
+        MaterialPageRoute(builder: (context) => CreatePdf(person, Itemlist)));
   }
 
   @override
