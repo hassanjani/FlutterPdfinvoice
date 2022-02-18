@@ -305,12 +305,12 @@ class _CreatePdfState extends State<CreatePdf> {
     // page.graphics.drawLine(linePen, Offset(0, pageSize.height - 100),
     //     Offset(pageSize.width, pageSize.height - 100));
     const String footerContent =
-        'Thank You for your Payment\r\n\r\nHello@tenecall.com';
+        'Thank You for your Payment\r\n\r\nHello@tenecall.com   ';
     //Added 30 as a margin for the layout
     page.graphics.drawString(
         footerContent, PdfStandardFont(PdfFontFamily.helvetica, 9),
         format: PdfStringFormat(alignment: PdfTextAlignment.right),
-        bounds: Rect.fromLTWH(pageSize.width / 2, pageSize.height - 70, 0, 0));
+        bounds: Rect.fromLTWH(pageSize.width / 2, pageSize.height - 40, 0, 0));
   }
 
   PdfGrid _getGrid1() {
